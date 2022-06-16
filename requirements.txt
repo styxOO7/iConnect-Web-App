@@ -1,0 +1,4 @@
+dj_database_url==0.5.0
+Django==3.2.5
+django_heroku==0.3.1
+gunicorn 

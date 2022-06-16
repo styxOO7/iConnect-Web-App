@@ -1,0 +1,488 @@
+{% load static %}
+
+<html>
+
+<head>
+	<title>{{room}} - {{username}}</title>
+	<link rel="icon" type="image/png" href="{% static 'images/icons/favicon.ico' %}"/>
+	<link href="https://fonts.googleapis.com/css2?family=Staatliches&family=Varela+Round&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Exo+2&display=swap" rel="stylesheet">
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"
+		integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="{% static 'roomUtils/assets/jquery-3.6.0.min.js' %}"></script>
+
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+		::-webkit-scrollbar {
+			width: 10px;
+		}
+
+		::-webkit-scrollbar-track {
+			background: #f1f1f1;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: #888;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background: #555;
+		}
+
+		body {
+			background-color: #28292D;
+			overflow: hidden;
+		}
+
+		.header-area {
+			height: 6%;
+			background-color: #202225;
+			font-family: 'Varela Round', sans-serif;
+			color: white;
+			box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.2), 0 0 1rem rgba(0, 0, 0, 0.2);
+			padding: 4px;
+			text-align: center;
+		}
+
+		.header-area button {
+			margin-right: 10px;
+			cursor: pointer;
+			margin-top: 6px;
+			margin-left: 5px;
+			background-color: transparent;
+			outline: none;
+			border: none;
+		}
+
+		.header-area .showlist {
+			float: left;
+		}
+
+		.header-area .showmore {
+			float: right;
+		}
+
+		.header-area button img {
+			width: 25px;
+			height: auto;
+		}
+
+		.message-area {
+			height: 83%;
+			padding: 3px;
+			overflow: auto;
+		}
+
+		.typing-area {
+			padding-top: 10px;
+			padding-bottom: 10px;
+			background-color: #17191E;
+			position: absolute;
+			bottom: 0;
+			height: 6%;
+			left: 0;
+			width: 100%;
+			text-align: center;
+		}
+
+		.typing-box {
+			background-color: #454850;
+			border-color: transparent;
+			border-radius: 5px;
+			width: 98%;
+			height: 100%;
+			font-family: 'Exo 2', sans-serif;
+			font-size: 15px;
+			color: white;
+			outline: none;
+			resize: none;
+			padding-top: 5px;
+			padding-right: 5px;
+			padding-left: 5px;
+		}
+
+		.message-box {
+			margin-top: 10px;
+		}
+
+		.others-message-box {}
+
+		.my-message-box {
+			text-align: right;
+		}
+
+		.message {
+			color: #EFEFEF;
+			font-size: 1rem;
+			word-spacing: 1px;
+			background: #16191C;
+			margin: 10px;
+			max-width: 50%;
+			min-width: 20%;
+			padding: 5px;
+			box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.2), 0 0 1rem rgba(0, 0, 0, 0.2);
+		}
+
+		.my-message {
+			/*color: #EFEFEF;*/
+			border-radius: 10px 0px 10px 10px;
+			padding: 10px;
+			font-family: 'Exo 2', sans-serif;
+			float: right;
+		}
+
+		.my-message .user-name {
+			margin-bottom: 5px;
+			color: tomato;
+			padding: 3px;
+			padding-right: 5px;
+			border-radius: 5px;
+			background-color: #36393F;
+		}
+
+		.my-message .user-name span {
+			color: #ACACAC;
+			font-size: 15px;
+		}
+
+		.others-message {
+			border-radius: 0px 10px 10px 10px;
+			padding: 10px;
+			font-family: 'Exo 2', sans-serif;
+			float: left;
+		}
+
+		.others-message .user-name {
+			margin-bottom: 5px;
+			color: greenyellow;
+			padding: 3px;
+			padding-left: 5px;
+			border-radius: 5px;
+			background-color: #36393F;
+		}
+
+		.others-message .user-name span {
+			color: #ACACAC;
+			font-size: 15px;
+		}
+
+		.separator {
+			width: 100%;
+			height: 8px;
+			float: left;
+		}
+
+
+
+		.members-list .mems {
+			background-color: #16191C;
+			border-radius: 5px;
+			height: 85%;
+			overflow-x: hidden;
+			overflow-y: auto;
+		}
+
+		.members-list .member-header {
+			padding: 10px;
+			margin-bottom: 10px;
+		}
+
+		.members-list .member-header h2 {
+			color: white;
+		}
+
+		.members-list .mems ul {
+			padding: 10px;
+		}
+
+		.members-list .mems ul li {
+			margin: 5px;
+			border-radius: 5px;
+			background-color: #393C42;
+			padding: 10px;
+			list-style-type: none;
+		}
+
+		.members-list .mems ul li a {
+			text-decoration: none;
+			color: lightblue;
+		}
+
+		.morelist {
+			display: none;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 50%;
+			height: auto;
+			border-radius: 10px 10px 10px 10px;
+			text-align: center;
+			transform: translate(-50%, -50%);
+			background-color: #16191C;
+			box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.2), 0 0 1rem rgba(0, 0, 0, 0.2);
+			font-family: 'Exo 2', sans-serif;
+			z-index: 1000;
+		}
+
+		.morelist h1,
+		h2,
+		h3 {
+			color: whitesmoke;
+			padding: 10px;
+			border-radius: 10px 10px 0px 0px;
+			background-color: #1E2126;
+		}
+
+		.morelist .menu {
+			margin-bottom: 50px;
+		}
+
+		.morelist .menu input {
+			font-family: 'Exo 2', sans-serif;
+			font-size: 17px;
+			display: inline-block;
+			margin-top: 50px;
+			border-radius: 10px;
+			text-align: center;
+			background-color: white;
+			border: 1px solid transparent;
+			outline: none;
+			padding: 10px;
+		}
+
+		.morelist .menu button {
+			font-family: 'Exo 2', sans-serif;
+			font-size: 17px;
+			outline: none;
+			border: 1px solid transparent;
+			padding: 10px;
+			border-radius: 10px;
+			background-color: #087CFD;
+			color: white;
+			cursor: pointer;
+		}
+
+		.morelist .back {
+			background-color: #087CFD;
+			border-radius: 0px 0px 10px 10px;
+			color: white;
+			padding: 10px;
+			cursor: pointer;
+		}
+
+		.overlay {
+			display: none;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background-image: radial-gradient(50% 100%, rgba(38, 18, 214, 0.54) 0%, rgba(76, 0, 120, 0.54) 0%, rgba(0, 0, 0, 0.54) 100%);
+			z-index: 100;
+		}
+
+		a {
+			color: inherit;
+			/* blue colors for links too */
+			text-decoration: inherit;
+			/* no underline */
+		}
+
+	</style>
+
+
+</head>
+
+<body>
+
+
+	<div class="start">
+		<div class="main">
+			<div class="overlay" id="overlay">
+				hello
+			</div>
+
+			<div class="morelist" id="morelist">
+				<div class="menu" id="menu">
+					<h1>Members</h1>
+					<div class="members-list" id="usersList">
+						<h3> No members</h3>
+					</div>
+					{% comment %} <input type="text" placeholder="Enter Username Here">
+
+					<button>Add Friend</button> {% endcomment %}
+				</div>
+				<a href="{% url 'home' %}">
+					<div class="back" id="back">
+						Home
+					</div>
+				</a>
+			</div>
+
+			<!-- script for userslist  -->
+			<script>
+				$(document).ready(function () {
+
+					setInterval(function () {
+						$.ajax({
+							type: 'GET',
+							url: "/getUserList/{{room}}/",
+							success: function (response) {
+								$("#usersList").empty();
+								for (var key in response.messages) {
+									if(response.messages[key] != "iConnect Team"){
+										var temp = '<h3>' + response.messages[key] + '</h3>';
+										$("#usersList").append(temp);
+										console.log("I am printing");
+									}
+								}
+							},
+							error: function (response) {
+								{% comment %} alert('Unable to fetch users list') {% endcomment %}
+							}
+						});
+					}, 1000);
+				})
+			</script>
+
+			<div class="header-area">
+				<button class="showmore" id="showmore">
+					<img src="{% static '/roomUtils/assets/iconmonstr-user-8-240.png' %}">
+				</button>
+				<h1>{{room}}</h1>
+				
+			</div>
+
+		</div>
+
+		<!-- messages area -->
+		<div class="message-area" id="message-area">
+			<div id="allMessages">
+				<div class="message-box others-message-box">
+					<div class="message others-message">
+						<div class="user-name">iConnect Team <span>Just Now</span></div>
+						Loading chats...
+					</div>
+					<div class="separator"></div>
+				</div>
+			
+			</div>
+		</div>
+
+		<!-- script for display messages after every 1s -->
+		<script>
+			$(document).ready(function () {
+				setInterval(function () {
+					$.ajax({
+						type: 'GET',
+						url: "/getMessages/{{room}}/",
+						success: function (response) {
+							console.log(response);
+							$("#allMessages").empty();
+
+							for (var key in response.messages) {
+
+								if (response.messages[key].user != $('#username').val()) {
+									var temp = '<div class="message-box others-message-box"><div class="message others-message"><div class="user-name">' + response.messages[key].user + '<span> ' + response.messages[key].time + '</span><span> ' + response.messages[key].date + '</span></div>' + response.messages[key].value + '</div><div class="separator"></div></div>';
+
+									$("#allMessages").append(temp);
+
+								}
+								else {
+									var temp = '<div class="message-box my-message-box"><div class="message my-message"><div class="user-name">' + response.messages[key].user + '<span> ' + response.messages[key].time + '</span><span> ' + response.messages[key].date + '</span></div>' + response.messages[key].value + '</div><div class="separator"></div></div>';
+
+									$("#allMessages").append(temp);
+								}
+
+
+							}
+						},
+						error: function (response) {
+							{% comment %} alert('An error occured') {% endcomment %}
+						}
+					});
+				}, 1000);
+			})
+		</script>
+
+
+		<!-- input messages -->
+		<form class="typing-area" id="post-form">
+			{% csrf_token %}
+			<input type="hidden" name="username" id="username" value="{{username}}" />
+			<input type="hidden" name="room" id="room" value="{{room}}" />
+
+			<textarea type="text" class="typing-box" id="message" name="message"
+				placeholder="Write Your Message Here"></textarea>
+			{% comment %} <button class="btn btn-primary" type="submit">Send</button> {% endcomment %}
+			<!-- <textarea type="text" class="typing-box" id="typing-box" placeholder="Write Your Message Here"></textarea> -->
+
+			<!-- <form class="typing-area" id="post-form">
+				{% csrf_token %}
+				<input type="hidden" name="username" id="username" value="{{username}}"/>
+				<input type="hidden" name="room" id="room" value="{{room}}"/>
+				<input type="text" class="form-control" placeholder="Type your message" name="message" id="message"/>
+				<button class="btn btn-primary" type="submit" >Send</button> 
+
+				<textarea type="text" class="typing-box" id="typing-box" placeholder="Write Your Message Here"></textarea>
+			</form> -->
+
+		</form>
+	</div>
+
+
+
+</body>
+<script type="text/javascript" src="{% static '/roomUtils/core.js' %}"></script>
+
+<script type="text/javascript">
+
+	$('#message').keyup('#post-form', function (e) {
+		if (event.keyCode == 13) {
+			e.preventDefault();
+			var content = document.getElementById("message").value;
+			$.ajax({
+				type: 'POST',
+				url: '/send',
+				data: {
+					username: $('#username').val(),
+					room: $('#room').val(),
+					message: content,
+					csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+				},
+				success: function (data) {
+					{% comment %} alert(data)    {% endcomment %}
+				}
+			});
+			document.getElementById('message').value = ''
+		}
+	});
+</script>
+
+
+{% comment %}
+<script type="text/javascript">
+	$(document).on('submit', '#post-form', function (e) {
+		e.preventDefault();
+		$.ajax({
+			type: 'POST',
+			url: '/send',
+			data: {
+				username: $('#username').val(),
+				room: $('#room').val(),
+				message: $('#message').val(),
+				csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+			},
+			success: function (data) {
+				alert(data)
+			}
+		});
+		document.getElementById('message').value = ''
+
+	});
+</script> {% endcomment %}
+
+</html>
